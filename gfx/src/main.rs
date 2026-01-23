@@ -1,3 +1,7 @@
+mod raylib;
+
+use raylib::wrapper::init_window;
+
 fn main() {
-  println!("Hello, world!");
+  let _ = init_window(800, 600, "urmom");
 }
