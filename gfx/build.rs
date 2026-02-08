@@ -1,6 +1,7 @@
 use {
   bindgen::{BindgenError, Builder},
   std::{
+    collections::HashSet,
     io,
     path::PathBuf,
     process::{Command, ExitCode},
@@ -8,22 +9,43 @@ use {
   thiserror::Error,
 };
 
+#[derive(Debug)]
+struct IgnoreMacros(HashSet<String>);
+
+impl bindgen::callbacks::ParseCallbacks for IgnoreMacros {
+  fn will_parse_macro(&self, name: &str) -> bindgen::callbacks::MacroParsingBehavior {
+    if self.0.contains(name) {
+      bindgen::callbacks::MacroParsingBehavior::Ignore
+    } else {
+      bindgen::callbacks::MacroParsingBehavior::Default
+    }
+  }
+}
+
 #[derive(Error, Debug)]
 enum RaylibBuildError {
-  #[error("failed to run build command")]
-  CmakeFailed(#[from] io::Error),
+  #[error("failed to run build command: {0}")]
+  MakeFailed(#[from] io::Error),
   #[error("build command exited unsuccessfully")]
-  CmakeUnsuccessful,
+  MakeUnsuccessful,
   #[error("build command interrupted")]
-  CmakeInterrupted,
+  MakeInterrupted,
 }
 
 #[derive(Error, Debug)]
 enum RaylibGenBindingsError {
-  #[error("failed to generate bindings data")]
+  #[error("failed to generate bindings data: {0}")]
   GenerationFailed(#[from] BindgenError),
-  #[error("failed to write bindings to output file")]
+  #[error("failed to write bindings to output file: {0}")]
   WriteFailed(#[from] io::Error),
+}
+
+#[derive(Error, Debug)]
+enum BuildError {
+  #[error("failed to build raylib: {0}")]
+  RaylibBuild(#[from] RaylibBuildError),
+  #[error("failed to create bindings for raylib: {0}")]
+  RaylibGenBindings(#[from] RaylibGenBindingsError),
 }
 
 fn build_raylib() -> Result<(), RaylibBuildError> {
@@ -35,34 +57,62 @@ fn build_raylib() -> Result<(), RaylibBuildError> {
     if code == 0 {
       Ok(())
     } else {
-      Err(RaylibBuildError::CmakeUnsuccessful)
+      Err(RaylibBuildError::MakeUnsuccessful)
     }
   } else {
-    Err(RaylibBuildError::CmakeInterrupted)
+    Err(RaylibBuildError::MakeInterrupted)
   }
 }
 
 fn generate_raylib_bindings() -> Result<(), RaylibGenBindingsError> {
+  let ignored_macros = IgnoreMacros(
+    vec![
+      "FP_INFINITE".into(),
+      "FP_NAN".into(),
+      "FP_NORMAL".into(),
+      "FP_SUBNORMAL".into(),
+      "FP_ZERO".into(),
+      "IPPORT_RESERVED".into(),
+    ]
+    .into_iter()
+    .collect(),
+  );
   Builder::default()
-    .header("raylib/src/raylib.h")
+    .headers([
+      "raylib/src/raylib.h",
+      "raylib/src/raymath.h",
+      "raylib/src/rcamera.h",
+    ])
+    .parse_callbacks(Box::new(ignored_macros))
     .generate()?
     .write_to_file("src/raylib/bindings.rs")?;
   Ok(())
 }
 
+fn build() -> Result<(), BuildError> {
+  build_raylib()?;
+  generate_raylib_bindings()?;
+
+  let raylib_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("raylib/src");
+
+  println!("cargo:rustc-link-search=native={}", raylib_path.display());
+  println!("cargo::rustc-link-lib=static=raylib");
+  Ok(())
+}
+
 fn main() -> ExitCode {
-  if let Err(err) = build_raylib() {
-    println!("cargo::error=An error occured during raylib build: {err}");
+  use BuildError::*;
+  if let Err(err) = build() {
+    match err {
+      RaylibBuild(err) => {
+        println!("cargo::error=An error occured during raylib build: {err}");
+      }
+      RaylibGenBindings(err) => {
+        println!("cargo::error=An error occured during raylib bindings generation: {err}");
+      }
+    }
     ExitCode::FAILURE
   } else {
-    if let Err(err) = generate_raylib_bindings() {
-      println!("cargo::error=An error occured during raylib bindings generation: {err}");
-    }
-
-    let raylib_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("raylib/src");
-
-    println!("cargo:rustc-link-search=native={}", raylib_path.display());
-    println!("cargo::rustc-link-lib=static=raylib");
     ExitCode::SUCCESS
   }
 }
