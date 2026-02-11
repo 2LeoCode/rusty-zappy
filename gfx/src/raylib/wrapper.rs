@@ -1,48 +1,58 @@
 use {
-  crate::raylib::bindings::{
-    BeginDrawing, BeginMode3D, Camera3D as RaylibCamera3D, CameraMode_CAMERA_CUSTOM,
-    CameraMode_CAMERA_FIRST_PERSON, CameraMode_CAMERA_FREE, CameraMode_CAMERA_ORBITAL,
-    CameraMode_CAMERA_THIRD_PERSON, CameraMoveRight, CameraMoveUp,
-    CameraProjection_CAMERA_ORTHOGRAPHIC, CameraProjection_CAMERA_PERSPECTIVE, ClearBackground,
-    CloseWindow, Color as RaylibColor, DisableCursor, DrawCube, DrawCubeWires, DrawGrid, DrawModel,
-    DrawText, EnableCursor, EndDrawing, EndMode3D, GetCurrentMonitor, GetMonitorRefreshRate,
-    InitWindow, IsKeyDown, KeyboardKey_KEY_A, KeyboardKey_KEY_APOSTROPHE, KeyboardKey_KEY_B,
-    KeyboardKey_KEY_BACK, KeyboardKey_KEY_BACKSLASH, KeyboardKey_KEY_BACKSPACE, KeyboardKey_KEY_C,
-    KeyboardKey_KEY_CAPS_LOCK, KeyboardKey_KEY_COMMA, KeyboardKey_KEY_D, KeyboardKey_KEY_DELETE,
-    KeyboardKey_KEY_DOWN, KeyboardKey_KEY_E, KeyboardKey_KEY_EIGHT, KeyboardKey_KEY_END,
-    KeyboardKey_KEY_ENTER, KeyboardKey_KEY_EQUAL, KeyboardKey_KEY_ESCAPE, KeyboardKey_KEY_F,
-    KeyboardKey_KEY_F1, KeyboardKey_KEY_F2, KeyboardKey_KEY_F3, KeyboardKey_KEY_F4,
-    KeyboardKey_KEY_F5, KeyboardKey_KEY_F6, KeyboardKey_KEY_F7, KeyboardKey_KEY_F8,
-    KeyboardKey_KEY_F9, KeyboardKey_KEY_F10, KeyboardKey_KEY_F11, KeyboardKey_KEY_F12,
-    KeyboardKey_KEY_FIVE, KeyboardKey_KEY_FOUR, KeyboardKey_KEY_G, KeyboardKey_KEY_GRAVE,
-    KeyboardKey_KEY_H, KeyboardKey_KEY_HOME, KeyboardKey_KEY_I, KeyboardKey_KEY_INSERT,
-    KeyboardKey_KEY_J, KeyboardKey_KEY_K, KeyboardKey_KEY_KB_MENU, KeyboardKey_KEY_KP_0,
-    KeyboardKey_KEY_KP_1, KeyboardKey_KEY_KP_2, KeyboardKey_KEY_KP_3, KeyboardKey_KEY_KP_4,
-    KeyboardKey_KEY_KP_5, KeyboardKey_KEY_KP_6, KeyboardKey_KEY_KP_7, KeyboardKey_KEY_KP_8,
-    KeyboardKey_KEY_KP_9, KeyboardKey_KEY_KP_ADD, KeyboardKey_KEY_KP_DECIMAL,
-    KeyboardKey_KEY_KP_DIVIDE, KeyboardKey_KEY_KP_ENTER, KeyboardKey_KEY_KP_EQUAL,
-    KeyboardKey_KEY_KP_MULTIPLY, KeyboardKey_KEY_KP_SUBTRACT, KeyboardKey_KEY_L,
-    KeyboardKey_KEY_LEFT, KeyboardKey_KEY_LEFT_ALT, KeyboardKey_KEY_LEFT_BRACKET,
-    KeyboardKey_KEY_LEFT_CONTROL, KeyboardKey_KEY_LEFT_SHIFT, KeyboardKey_KEY_LEFT_SUPER,
-    KeyboardKey_KEY_M, KeyboardKey_KEY_MENU, KeyboardKey_KEY_MINUS, KeyboardKey_KEY_N,
-    KeyboardKey_KEY_NINE, KeyboardKey_KEY_NULL, KeyboardKey_KEY_NUM_LOCK, KeyboardKey_KEY_O,
-    KeyboardKey_KEY_ONE, KeyboardKey_KEY_P, KeyboardKey_KEY_PAGE_DOWN, KeyboardKey_KEY_PAGE_UP,
-    KeyboardKey_KEY_PAUSE, KeyboardKey_KEY_PERIOD, KeyboardKey_KEY_PRINT_SCREEN, KeyboardKey_KEY_Q,
-    KeyboardKey_KEY_R, KeyboardKey_KEY_RIGHT, KeyboardKey_KEY_RIGHT_ALT,
-    KeyboardKey_KEY_RIGHT_BRACKET, KeyboardKey_KEY_RIGHT_CONTROL, KeyboardKey_KEY_RIGHT_SHIFT,
-    KeyboardKey_KEY_RIGHT_SUPER, KeyboardKey_KEY_S, KeyboardKey_KEY_SCROLL_LOCK,
-    KeyboardKey_KEY_SEMICOLON, KeyboardKey_KEY_SEVEN, KeyboardKey_KEY_SIX, KeyboardKey_KEY_SLASH,
-    KeyboardKey_KEY_SPACE, KeyboardKey_KEY_T, KeyboardKey_KEY_TAB, KeyboardKey_KEY_THREE,
-    KeyboardKey_KEY_TWO, KeyboardKey_KEY_U, KeyboardKey_KEY_UP, KeyboardKey_KEY_V,
-    KeyboardKey_KEY_VOLUME_DOWN, KeyboardKey_KEY_VOLUME_UP, KeyboardKey_KEY_W, KeyboardKey_KEY_X,
-    KeyboardKey_KEY_Y, KeyboardKey_KEY_Z, KeyboardKey_KEY_ZERO, Model as RaylibModel, SetTargetFPS,
-    UpdateCamera, WindowShouldClose,
+  crate::raylib::{
+    bindings::{
+      BeginDrawing, BeginMode3D, Camera3D as RaylibCamera3D, CameraMode_CAMERA_CUSTOM,
+      CameraMode_CAMERA_FIRST_PERSON, CameraMode_CAMERA_FREE, CameraMode_CAMERA_ORBITAL,
+      CameraMode_CAMERA_THIRD_PERSON, CameraMoveForward, CameraMoveRight, CameraMoveUp,
+      CameraProjection_CAMERA_ORTHOGRAPHIC, CameraProjection_CAMERA_PERSPECTIVE, ClearBackground,
+      CloseWindow, Color as RaylibColor, DEG2RAD, DisableCursor, DrawCube, DrawCubeWires, DrawGrid,
+      DrawModel, DrawText, EnableCursor, EndDrawing, EndMode3D, GetCurrentMonitor,
+      GetMonitorHeight, GetMonitorPhysicalWidth, GetMonitorRefreshRate, GetMonitorWidth,
+      GetMouseWheelMove, GetMouseWheelMoveV, GetScreenHeight, GetScreenToWorld2D, GetScreenWidth,
+      InitWindow, IsKeyDown, KeyboardKey_KEY_A, KeyboardKey_KEY_APOSTROPHE, KeyboardKey_KEY_B,
+      KeyboardKey_KEY_BACK, KeyboardKey_KEY_BACKSLASH, KeyboardKey_KEY_BACKSPACE,
+      KeyboardKey_KEY_C, KeyboardKey_KEY_CAPS_LOCK, KeyboardKey_KEY_COMMA, KeyboardKey_KEY_D,
+      KeyboardKey_KEY_DELETE, KeyboardKey_KEY_DOWN, KeyboardKey_KEY_E, KeyboardKey_KEY_EIGHT,
+      KeyboardKey_KEY_END, KeyboardKey_KEY_ENTER, KeyboardKey_KEY_EQUAL, KeyboardKey_KEY_ESCAPE,
+      KeyboardKey_KEY_F, KeyboardKey_KEY_F1, KeyboardKey_KEY_F2, KeyboardKey_KEY_F3,
+      KeyboardKey_KEY_F4, KeyboardKey_KEY_F5, KeyboardKey_KEY_F6, KeyboardKey_KEY_F7,
+      KeyboardKey_KEY_F8, KeyboardKey_KEY_F9, KeyboardKey_KEY_F10, KeyboardKey_KEY_F11,
+      KeyboardKey_KEY_F12, KeyboardKey_KEY_FIVE, KeyboardKey_KEY_FOUR, KeyboardKey_KEY_G,
+      KeyboardKey_KEY_GRAVE, KeyboardKey_KEY_H, KeyboardKey_KEY_HOME, KeyboardKey_KEY_I,
+      KeyboardKey_KEY_INSERT, KeyboardKey_KEY_J, KeyboardKey_KEY_K, KeyboardKey_KEY_KB_MENU,
+      KeyboardKey_KEY_KP_0, KeyboardKey_KEY_KP_1, KeyboardKey_KEY_KP_2, KeyboardKey_KEY_KP_3,
+      KeyboardKey_KEY_KP_4, KeyboardKey_KEY_KP_5, KeyboardKey_KEY_KP_6, KeyboardKey_KEY_KP_7,
+      KeyboardKey_KEY_KP_8, KeyboardKey_KEY_KP_9, KeyboardKey_KEY_KP_ADD,
+      KeyboardKey_KEY_KP_DECIMAL, KeyboardKey_KEY_KP_DIVIDE, KeyboardKey_KEY_KP_ENTER,
+      KeyboardKey_KEY_KP_EQUAL, KeyboardKey_KEY_KP_MULTIPLY, KeyboardKey_KEY_KP_SUBTRACT,
+      KeyboardKey_KEY_L, KeyboardKey_KEY_LEFT, KeyboardKey_KEY_LEFT_ALT,
+      KeyboardKey_KEY_LEFT_BRACKET, KeyboardKey_KEY_LEFT_CONTROL, KeyboardKey_KEY_LEFT_SHIFT,
+      KeyboardKey_KEY_LEFT_SUPER, KeyboardKey_KEY_M, KeyboardKey_KEY_MENU, KeyboardKey_KEY_MINUS,
+      KeyboardKey_KEY_N, KeyboardKey_KEY_NINE, KeyboardKey_KEY_NULL, KeyboardKey_KEY_NUM_LOCK,
+      KeyboardKey_KEY_O, KeyboardKey_KEY_ONE, KeyboardKey_KEY_P, KeyboardKey_KEY_PAGE_DOWN,
+      KeyboardKey_KEY_PAGE_UP, KeyboardKey_KEY_PAUSE, KeyboardKey_KEY_PERIOD,
+      KeyboardKey_KEY_PRINT_SCREEN, KeyboardKey_KEY_Q, KeyboardKey_KEY_R, KeyboardKey_KEY_RIGHT,
+      KeyboardKey_KEY_RIGHT_ALT, KeyboardKey_KEY_RIGHT_BRACKET, KeyboardKey_KEY_RIGHT_CONTROL,
+      KeyboardKey_KEY_RIGHT_SHIFT, KeyboardKey_KEY_RIGHT_SUPER, KeyboardKey_KEY_S,
+      KeyboardKey_KEY_SCROLL_LOCK, KeyboardKey_KEY_SEMICOLON, KeyboardKey_KEY_SEVEN,
+      KeyboardKey_KEY_SIX, KeyboardKey_KEY_SLASH, KeyboardKey_KEY_SPACE, KeyboardKey_KEY_T,
+      KeyboardKey_KEY_TAB, KeyboardKey_KEY_THREE, KeyboardKey_KEY_TWO, KeyboardKey_KEY_U,
+      KeyboardKey_KEY_UP, KeyboardKey_KEY_V, KeyboardKey_KEY_VOLUME_DOWN,
+      KeyboardKey_KEY_VOLUME_UP, KeyboardKey_KEY_W, KeyboardKey_KEY_X, KeyboardKey_KEY_Y,
+      KeyboardKey_KEY_Z, KeyboardKey_KEY_ZERO, Model as RaylibModel, RL_MODELVIEW, RL_PROJECTION,
+      SetTargetFPS, SetWindowPosition, SetWindowSize, UpdateCamera, WindowShouldClose,
+      rlDrawRenderBatchActive, rlEnableDepthTest, rlFrustum, rlGetCullDistanceFar,
+      rlGetCullDistanceNear, rlLoadIdentity, rlMatrixMode, rlMultMatrixf, rlOrtho, rlPushMatrix,
+    },
+    custom_bindings::{MatrixLookAt, MatrixToFloatV},
   },
   std::ffi::{CString, NulError, c_int},
   thiserror::Error,
 };
 
 pub use crate::raylib::bindings::{Vector2, Vector3, Vector4};
+
+const CULL_FACTOR: f64 = 0.707106782;
 
 #[derive(Error, Debug)]
 pub enum InitWindowError {
@@ -141,9 +151,9 @@ pub enum KeyboardKey {
   X,
   Y,
   Z,
-  Left_bracket,
+  LeftBracket,
   Backslash,
-  Right_bracket,
+  RightBracket,
   Grave,
   Space,
   Escape,
@@ -156,14 +166,14 @@ pub enum KeyboardKey {
   Left,
   Down,
   Up,
-  Page_up,
-  Page_down,
+  PageUp,
+  PageDown,
   Home,
   End,
-  Caps_lock,
-  Scroll_lock,
-  Num_lock,
-  Print_screen,
+  CapsLock,
+  ScrollLock,
+  NumLock,
+  PrintScreen,
   Pause,
   F1,
   F2,
@@ -177,40 +187,51 @@ pub enum KeyboardKey {
   F10,
   F11,
   F12,
-  Left_shift,
-  Left_control,
-  Left_alt,
-  Left_super,
-  Right_shift,
-  Right_control,
-  Right_alt,
-  Right_super,
-  Kb_menu,
-  Kp_0,
-  Kp_1,
-  Kp_2,
-  Kp_3,
-  Kp_4,
-  Kp_5,
-  Kp_6,
-  Kp_7,
-  Kp_8,
-  Kp_9,
-  Kp_decimal,
-  Kp_divide,
-  Kp_multiply,
-  Kp_subtract,
-  Kp_add,
-  Kp_enter,
-  Kp_equal,
+  LeftShift,
+  LeftControl,
+  LeftAlt,
+  LeftSuper,
+  RightShift,
+  RightControl,
+  RightAlt,
+  RightSuper,
+  KbMenu,
+  Kp0,
+  Kp1,
+  Kp2,
+  Kp3,
+  Kp4,
+  Kp5,
+  Kp6,
+  Kp7,
+  Kp8,
+  Kp9,
+  KpDecimal,
+  KpDivide,
+  KpMultiply,
+  KpSubtract,
+  KpAdd,
+  KpEnter,
+  KpEqual,
   Back,
   Menu,
-  Volume_up,
-  Volume_down,
+  VolumeUp,
+  VolumeDown,
   Other(u32),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
+enum MouseButton {
+  Left,
+  Right,
+  Middle,
+  Side,
+  Extra,
+  Forward,
+  Back,
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum Camera3DProjection {
   Perspective,
   Orthographic,
@@ -225,10 +246,12 @@ pub enum Camera3DMode {
   ThirdPerson,
 }
 
+#[derive(Debug)]
 pub struct Window {
   title: CString,
 }
 
+#[derive(Debug)]
 pub struct Monitor {
   id: i32,
 }
@@ -242,12 +265,12 @@ pub struct Pen3D {
 }
 
 #[derive(Clone, Debug)]
-pub struct Camera3D {
-  pub position: Vector3,
-  pub target: Vector3,
-  pub up: Vector3,
-  pub fovy: f32,
-  pub projection: Camera3DProjection,
+pub struct Camera3D<'a> {
+  window: &'a Window,
+  projection: Camera3DProjection,
+  near: f64,
+  far: f64,
+  raylib_camera_3d: RaylibCamera3D,
 }
 
 impl From<Color> for RaylibColor {
@@ -463,9 +486,9 @@ impl From<KeyboardKey> for u32 {
       X => KeyboardKey_KEY_X,
       Y => KeyboardKey_KEY_Y,
       Z => KeyboardKey_KEY_Z,
-      Left_bracket => KeyboardKey_KEY_LEFT_BRACKET,
+      LeftBracket => KeyboardKey_KEY_LEFT_BRACKET,
       Backslash => KeyboardKey_KEY_BACKSLASH,
-      Right_bracket => KeyboardKey_KEY_RIGHT_BRACKET,
+      RightBracket => KeyboardKey_KEY_RIGHT_BRACKET,
       Grave => KeyboardKey_KEY_GRAVE,
       Space => KeyboardKey_KEY_SPACE,
       Escape => KeyboardKey_KEY_ESCAPE,
@@ -478,14 +501,14 @@ impl From<KeyboardKey> for u32 {
       Left => KeyboardKey_KEY_LEFT,
       Down => KeyboardKey_KEY_DOWN,
       Up => KeyboardKey_KEY_UP,
-      Page_up => KeyboardKey_KEY_PAGE_UP,
-      Page_down => KeyboardKey_KEY_PAGE_DOWN,
+      PageUp => KeyboardKey_KEY_PAGE_UP,
+      PageDown => KeyboardKey_KEY_PAGE_DOWN,
       Home => KeyboardKey_KEY_HOME,
       End => KeyboardKey_KEY_END,
-      Caps_lock => KeyboardKey_KEY_CAPS_LOCK,
-      Scroll_lock => KeyboardKey_KEY_SCROLL_LOCK,
-      Num_lock => KeyboardKey_KEY_NUM_LOCK,
-      Print_screen => KeyboardKey_KEY_PRINT_SCREEN,
+      CapsLock => KeyboardKey_KEY_CAPS_LOCK,
+      ScrollLock => KeyboardKey_KEY_SCROLL_LOCK,
+      NumLock => KeyboardKey_KEY_NUM_LOCK,
+      PrintScreen => KeyboardKey_KEY_PRINT_SCREEN,
       Pause => KeyboardKey_KEY_PAUSE,
       F1 => KeyboardKey_KEY_F1,
       F2 => KeyboardKey_KEY_F2,
@@ -499,36 +522,36 @@ impl From<KeyboardKey> for u32 {
       F10 => KeyboardKey_KEY_F10,
       F11 => KeyboardKey_KEY_F11,
       F12 => KeyboardKey_KEY_F12,
-      Left_shift => KeyboardKey_KEY_LEFT_SHIFT,
-      Left_control => KeyboardKey_KEY_LEFT_CONTROL,
-      Left_alt => KeyboardKey_KEY_LEFT_ALT,
-      Left_super => KeyboardKey_KEY_LEFT_SUPER,
-      Right_shift => KeyboardKey_KEY_RIGHT_SHIFT,
-      Right_control => KeyboardKey_KEY_RIGHT_CONTROL,
-      Right_alt => KeyboardKey_KEY_RIGHT_ALT,
-      Right_super => KeyboardKey_KEY_RIGHT_SUPER,
-      Kb_menu => KeyboardKey_KEY_KB_MENU,
-      Kp_0 => KeyboardKey_KEY_KP_0,
-      Kp_1 => KeyboardKey_KEY_KP_1,
-      Kp_2 => KeyboardKey_KEY_KP_2,
-      Kp_3 => KeyboardKey_KEY_KP_3,
-      Kp_4 => KeyboardKey_KEY_KP_4,
-      Kp_5 => KeyboardKey_KEY_KP_5,
-      Kp_6 => KeyboardKey_KEY_KP_6,
-      Kp_7 => KeyboardKey_KEY_KP_7,
-      Kp_8 => KeyboardKey_KEY_KP_8,
-      Kp_9 => KeyboardKey_KEY_KP_9,
-      Kp_decimal => KeyboardKey_KEY_KP_DECIMAL,
-      Kp_divide => KeyboardKey_KEY_KP_DIVIDE,
-      Kp_multiply => KeyboardKey_KEY_KP_MULTIPLY,
-      Kp_subtract => KeyboardKey_KEY_KP_SUBTRACT,
-      Kp_add => KeyboardKey_KEY_KP_ADD,
-      Kp_enter => KeyboardKey_KEY_KP_ENTER,
-      Kp_equal => KeyboardKey_KEY_KP_EQUAL,
+      LeftShift => KeyboardKey_KEY_LEFT_SHIFT,
+      LeftControl => KeyboardKey_KEY_LEFT_CONTROL,
+      LeftAlt => KeyboardKey_KEY_LEFT_ALT,
+      LeftSuper => KeyboardKey_KEY_LEFT_SUPER,
+      RightShift => KeyboardKey_KEY_RIGHT_SHIFT,
+      RightControl => KeyboardKey_KEY_RIGHT_CONTROL,
+      RightAlt => KeyboardKey_KEY_RIGHT_ALT,
+      RightSuper => KeyboardKey_KEY_RIGHT_SUPER,
+      KbMenu => KeyboardKey_KEY_KB_MENU,
+      Kp0 => KeyboardKey_KEY_KP_0,
+      Kp1 => KeyboardKey_KEY_KP_1,
+      Kp2 => KeyboardKey_KEY_KP_2,
+      Kp3 => KeyboardKey_KEY_KP_3,
+      Kp4 => KeyboardKey_KEY_KP_4,
+      Kp5 => KeyboardKey_KEY_KP_5,
+      Kp6 => KeyboardKey_KEY_KP_6,
+      Kp7 => KeyboardKey_KEY_KP_7,
+      Kp8 => KeyboardKey_KEY_KP_8,
+      Kp9 => KeyboardKey_KEY_KP_9,
+      KpDecimal => KeyboardKey_KEY_KP_DECIMAL,
+      KpDivide => KeyboardKey_KEY_KP_DIVIDE,
+      KpMultiply => KeyboardKey_KEY_KP_MULTIPLY,
+      KpSubtract => KeyboardKey_KEY_KP_SUBTRACT,
+      KpAdd => KeyboardKey_KEY_KP_ADD,
+      KpEnter => KeyboardKey_KEY_KP_ENTER,
+      KpEqual => KeyboardKey_KEY_KP_EQUAL,
       Back => KeyboardKey_KEY_BACK,
       Menu => KeyboardKey_KEY_MENU,
-      Volume_up => KeyboardKey_KEY_VOLUME_UP,
-      Volume_down => KeyboardKey_KEY_VOLUME_DOWN,
+      VolumeUp => KeyboardKey_KEY_VOLUME_UP,
+      VolumeDown => KeyboardKey_KEY_VOLUME_DOWN,
       Other(value) => value,
     }
   }
@@ -595,6 +618,22 @@ impl Drop for Window {
 }
 
 impl Window {
+  pub fn set_size(&mut self, width: u32, height: u32) {
+    unsafe { SetWindowSize(width as c_int, height as c_int) }
+  }
+
+  pub fn set_position(&mut self, x: u32, y: u32) {
+    unsafe { SetWindowPosition(x as c_int, y as c_int) }
+  }
+
+  pub fn width(&self) -> u32 {
+    (unsafe { GetScreenWidth() }) as u32
+  }
+
+  pub fn height(&self) -> u32 {
+    (unsafe { GetScreenHeight() }) as u32
+  }
+
   pub fn title(&self) -> &str {
     unsafe { self.title.to_str().unwrap_unchecked() }
   }
@@ -619,6 +658,36 @@ impl Window {
   pub fn set_target_fps(&self, fps: i32) {
     unsafe { SetTargetFPS(fps as c_int) }
   }
+
+  pub fn new_camera_3d<'a>(
+    &'a self,
+    position: Vector3,
+    target: Vector3,
+    up: Vector3,
+    fovy: f32,
+    projection: Camera3DProjection,
+  ) -> Camera3D<'a> {
+    use Camera3DProjection::*;
+    Camera3D {
+      window: self,
+      projection: projection.clone(),
+      near: match projection {
+        Perspective => unsafe { rlGetCullDistanceNear() },
+        Orthographic => CULL_FACTOR * fovy as f64,
+      },
+      far: match projection {
+        Perspective => unsafe { rlGetCullDistanceFar() },
+        Orthographic => -(CULL_FACTOR * fovy as f64),
+      },
+      raylib_camera_3d: RaylibCamera3D {
+        position,
+        target,
+        up,
+        fovy,
+        projection: u32::from(projection) as i32,
+      },
+    }
+  }
 }
 
 impl Drop for Pen {
@@ -637,77 +706,132 @@ impl Pen {
   pub fn draw_text(
     &self,
     text: &str,
-    pos_x: i32,
-    pos_y: i32,
-    font_size: i32,
+    pos_x: u32,
+    pos_y: u32,
+    font_size: u32,
     color: Color,
   ) -> Result<(), DrawTextError> {
     let text = CString::new(text)?;
 
-    unsafe { DrawText(text.as_ptr(), pos_x, pos_y, font_size, color.into()) }
+    unsafe {
+      DrawText(
+        text.as_ptr(),
+        pos_x as c_int,
+        pos_y as c_int,
+        font_size as c_int,
+        color.into(),
+      )
+    }
     Ok(())
   }
 
   pub fn begin_mode_3d<F: FnOnce(Pen3D)>(&self, camera: &Camera3D, callback: F) {
-    unsafe { BeginMode3D(camera.clone().into()) }
+    // unsafe { BeginMode3D(camera.raylib_camera_3d) }
+    use Camera3DProjection::*;
+    unsafe {
+      rlDrawRenderBatchActive();
+      rlMatrixMode(RL_PROJECTION as c_int);
+      rlPushMatrix();
+      rlLoadIdentity();
+
+      let aspect = camera.window.width() as f64 / camera.window.height() as f64;
+
+      match camera.projection {
+        Perspective => {
+          let top =
+            rlGetCullDistanceNear() * (camera.fovy() as f64 * 0.5f64 * DEG2RAD).tan() as f64;
+          let right = top * aspect;
+
+          rlFrustum(-right, right, -top, top, camera.near, camera.far)
+        }
+        Orthographic => {
+          let top = (camera.fovy() / 2.) as f64;
+          let right = top * aspect;
+
+          rlOrtho(-right, right, -top, top, camera.near, camera.far);
+        }
+      }
+
+      rlMatrixMode(RL_MODELVIEW as c_int);
+      rlLoadIdentity();
+
+      let mat_view = MatrixLookAt(
+        camera.raylib_camera_3d.position,
+        camera.raylib_camera_3d.target,
+        camera.raylib_camera_3d.up,
+      );
+      rlMultMatrixf(MatrixToFloatV(mat_view).v.as_ptr());
+      rlEnableDepthTest();
+    }
     callback(Pen3D { __: () });
   }
 }
 
-impl TryFrom<RaylibCamera3D> for Camera3D {
-  type Error = Camera3DError;
-  fn try_from(value: RaylibCamera3D) -> Result<Self, Self::Error> {
-    Ok(Camera3D {
-      position: value.position,
-      target: value.target,
-      up: value.up,
-      fovy: value.fovy,
-      projection: Camera3DProjection::try_from(value.projection as u32)?,
-    })
+impl Camera3D<'_> {
+  pub fn fovy(&self) -> f32 {
+    self.raylib_camera_3d.fovy
   }
-}
 
-impl From<Camera3D> for RaylibCamera3D {
-  fn from(value: Camera3D) -> Self {
-    RaylibCamera3D {
-      position: value.position,
-      target: value.target,
-      up: value.up,
-      fovy: value.fovy,
-      projection: u32::from(value.projection) as i32,
+  pub fn set_fovy(&mut self, value: f32) {
+    self.raylib_camera_3d.fovy = value;
+    if self.projection == Camera3DProjection::Orthographic {
+      let distance = (self.window.height() / 2);
+      // if fov == 1 -> 1 case == 1 / 2
+      self.near = CULL_FACTOR * value as f64;
+      self.far = -(CULL_FACTOR * value as f64);
     }
   }
-}
 
-impl Camera3D {
   pub fn move_up(&mut self, distance: f32) {
-    let mut cam = RaylibCamera3D::from(self.clone());
-    unsafe { CameraMoveUp(&mut cam as *mut RaylibCamera3D, distance) }
-    *self = unsafe { cam.try_into().unwrap_unchecked() }
+    let sign = -(distance / distance.abs());
+    let offset = ((distance * distance) / 2.).sqrt() * sign;
+    self.raylib_camera_3d.position.x += offset;
+    self.raylib_camera_3d.position.z += offset;
+    self.raylib_camera_3d.target.x += offset;
+    self.raylib_camera_3d.target.z += offset;
   }
 
   pub fn move_right(&mut self, distance: f32, move_in_world_plane: bool) {
-    let mut cam = RaylibCamera3D::from(self.clone());
     unsafe {
       CameraMoveRight(
-        &mut cam as *mut RaylibCamera3D,
+        &mut self.raylib_camera_3d as *mut RaylibCamera3D,
         distance,
         move_in_world_plane,
       )
     }
-    *self = unsafe { cam.try_into().unwrap_unchecked() }
+  }
+
+  pub fn move_forward(&mut self, distance: f32, move_in_world_plane: bool) {
+    unsafe {
+      CameraMoveForward(
+        &mut self.raylib_camera_3d as *mut RaylibCamera3D,
+        distance,
+        move_in_world_plane,
+      );
+    }
   }
 
   pub fn update(&mut self, mode: Camera3DMode) {
-    let mut cam = RaylibCamera3D::from(self.clone());
-    unsafe { UpdateCamera(&mut cam as *mut RaylibCamera3D, u32::from(mode) as c_int) }
-    *self = unsafe { cam.try_into().unwrap_unchecked() }
+    unsafe {
+      UpdateCamera(
+        &mut self.raylib_camera_3d as *mut RaylibCamera3D,
+        u32::from(mode) as c_int,
+      )
+    }
   }
 }
 
 impl Monitor {
   pub fn get_refresh_rate(&self) -> i32 {
     (unsafe { GetMonitorRefreshRate(self.id as c_int) }) as i32
+  }
+
+  pub fn width(&self) -> u32 {
+    (unsafe { GetMonitorWidth(self.id as c_int) }) as u32
+  }
+
+  pub fn height(&self) -> u32 {
+    (unsafe { GetMonitorHeight(self.id as c_int) }) as u32
   }
 }
 
@@ -744,7 +868,7 @@ impl Pen3D {
   }
 }
 
-pub fn init_window(width: i32, height: i32, title: &str) -> Result<Window, InitWindowError> {
+pub fn init_window(width: u32, height: u32, title: &str) -> Result<Window, InitWindowError> {
   let title = CString::new(title)?;
 
   unsafe { InitWindow(width as c_int, height as c_int, title.as_ptr()) }
@@ -752,11 +876,28 @@ pub fn init_window(width: i32, height: i32, title: &str) -> Result<Window, InitW
 }
 
 pub fn get_current_monitor() -> Monitor {
-  Monitor {
-    id: unsafe { GetCurrentMonitor() } as i32,
-  }
+  let id = unsafe { GetCurrentMonitor() } as i32;
+  Monitor { id }
 }
 
 pub fn is_key_down(key: KeyboardKey) -> bool {
   unsafe { IsKeyDown(u32::from(key) as c_int) }
+}
+
+pub fn is_mouse_wheel_moving() -> bool {
+  let wheel_move = unsafe { GetMouseWheelMove() };
+  wheel_move < -0.01 || wheel_move > 0.01
+}
+
+pub fn is_mouse_wheel_moving_y() -> bool {
+  let wheel_move = get_mouse_wheel_move_y();
+  wheel_move < -0.01 || wheel_move > 0.01
+}
+
+pub fn get_mouse_wheel_move() -> Vector2 {
+  unsafe { GetMouseWheelMoveV() }
+}
+
+pub fn get_mouse_wheel_move_y() -> f32 {
+  get_mouse_wheel_move().y
 }

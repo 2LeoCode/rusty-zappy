@@ -78,11 +78,7 @@ fn generate_raylib_bindings() -> Result<(), RaylibGenBindingsError> {
     .collect(),
   );
   Builder::default()
-    .headers([
-      "raylib/src/raylib.h",
-      "raylib/src/raymath.h",
-      "raylib/src/rcamera.h",
-    ])
+    .header("src/raylib/wrapper.h")
     .parse_callbacks(Box::new(ignored_macros))
     .generate()?
     .write_to_file("src/raylib/bindings.rs")?;
