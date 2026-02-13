@@ -1,12 +1,16 @@
 mod raylib;
 
-use std::thread::current;
-
-use raylib::wrapper::{Color, get_current_monitor, init_window};
-
-use crate::raylib::wrapper::{
-  Camera3D, Camera3DMode, Camera3DProjection, KeyboardKey, Vector3, get_mouse_wheel_move_y,
-  is_key_down, is_mouse_wheel_moving_y,
+use {
+  crate::raylib::{
+    Vector3,
+    cameras::{Camera3D, Camera3DProjection},
+    colors::Color,
+    input::{KeyboardKey, get_mouse_wheel_move_y, is_key_down, is_mouse_wheel_moving_y},
+    window::Window,
+  },
+  common::zappy::{World, constants::TEAM_SIZE},
+  rand::rng,
+  std::error::Error,
 };
 
 const CAMERA_SPEED: f32 = 1.;
@@ -40,10 +44,30 @@ fn update_camera(camera: &mut Camera3D) {
   }
 }
 
-fn main() {
+struct Scene {}
+
+impl Scene {
+  fn new() -> Self {
+    Self {}
+  }
+}
+
+fn gfx() -> Result<(), impl Error> {
   const GRID_SIZE: u32 = 128;
-  let window = init_window(1920, 1080, "zappy").expect("Invalid arguments to init_window");
-  let current_monitor = get_current_monitor();
+  let window = Window::try_init(1920, 1080, "zappy").expect("Invalid arguments to init_window");
+  let current_monitor = window.get_current_monitor();
+  let mut rng = rng();
+  let mut world = World::generate(&mut rng, 128, 128);
+
+  world.add_team("Team 1")?;
+  world.add_team("Team 2")?;
+  world.add_team("Team 3")?;
+
+  for _ in 0..TEAM_SIZE {
+    world.add_player("Team 1")?;
+    world.add_player("Team 2")?;
+    world.add_player("Team 3")?;
+  }
   // window.set_size(current_monitor.width(), current_monitor.height());
   // window.set_position(0, 0);
   // let window = window;
@@ -75,14 +99,15 @@ fn main() {
   );
 
   window.set_target_fps(current_monitor.get_refresh_rate());
-  while !window.should_close() {
+  Ok::<(), common::zappy::Error>(while !window.should_close() {
     update_camera(&mut camera);
     window.begin_drawing(|pen| {
-      pen.clear_background(Color::RayWhite);
+      use Color::*;
+      pen.clear_background(RayWhite);
       pen.begin_mode_3d(&camera, |pen_3d| {
         pen_3d.draw_grid(GRID_SIZE as i32, 1.);
-        pen_3d.draw_cube(cube_position, 2., 2., 2., Color::Red);
-        pen_3d.draw_cube_wires(cube_position, 2., 2., 2., Color::Blue);
+        pen_3d.draw_cube(cube_position, 2., 2., 2., Red);
+        pen_3d.draw_cube_wires(cube_position, 2., 2., 2., Blue);
       });
 
       // pen
@@ -95,5 +120,7 @@ fn main() {
       //   )
       //   .expect("Invalid arguments to draw_text");
     });
-  }
+  })
 }
+
+fn main() {}

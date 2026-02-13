@@ -9,3 +9,5 @@ thiserror = "2.0.18"
 
 [dependencies]
 thiserror = "2.0.18"
+rand = "0.10.0"
+common = { path = "../common" }

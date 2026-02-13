@@ -2,4 +2,6 @@
 mod bindings;
 
 mod custom_bindings;
-pub mod wrapper;
+mod wrapper;
+
+pub use {bindings::Vector3, wrapper::*};
