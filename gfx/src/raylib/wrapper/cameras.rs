@@ -12,6 +12,8 @@ use {
   thiserror::Error,
 };
 
+pub(crate) const ORTHO_CULL_FACTOR: f64 = 0.7071067812;
+
 #[derive(Error, Debug)]
 pub enum Error {
   #[error("invalid camera projection value: {0}")]
@@ -104,9 +106,8 @@ impl Camera3D<'_> {
   pub fn set_fovy(&mut self, value: f32) {
     self.raylib_camera_3d.fovy = value;
     if self.projection == Camera3DProjection::Orthographic {
-      let distance = (self.window.height / 2);
-      self.near = -(self.window.height as f32 * 20.) as f64 / 2500.;
-      self.far = -self.near;
+      self.far = ORTHO_CULL_FACTOR * value as f64;
+      self.near = -self.far;
     }
   }
 
@@ -120,23 +121,13 @@ impl Camera3D<'_> {
   }
 
   pub fn move_right(&mut self, distance: f32, move_in_world_plane: bool) {
-    unsafe {
-      CameraMoveRight(
-        &mut self.raylib_camera_3d as *mut RaylibCamera3D,
-        distance,
-        move_in_world_plane,
-      )
-    }
-  }
-
-  pub fn move_forward(&mut self, distance: f32, move_in_world_plane: bool) {
-    unsafe {
-      CameraMoveForward(
-        &mut self.raylib_camera_3d as *mut RaylibCamera3D,
-        distance,
-        move_in_world_plane,
-      );
-    }
+    let sign = -(distance / distance.abs());
+    let ratio = self.window.height() as f32 / self.window.width() as f32;
+    let offset = ((distance * distance) / 2.).sqrt() * sign * ratio;
+    self.raylib_camera_3d.position.x -= offset;
+    self.raylib_camera_3d.position.z += offset;
+    self.raylib_camera_3d.target.x -= offset;
+    self.raylib_camera_3d.target.z += offset;
   }
 
   pub fn update(&mut self, mode: Camera3DMode) {

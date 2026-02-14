@@ -1,17 +1,28 @@
 use {
   crate::raylib::{
     bindings::{
-      BeginDrawing, Camera3D as RaylibCamera3D, CloseWindow, DisableCursor, EnableCursor,
-      GetCurrentMonitor, InitWindow, SetTargetFPS, SetWindowPosition, SetWindowSize, Vector3,
+      BeginDrawing, Camera3D as RaylibCamera3D, CloseWindow, ConfigFlags as RaylibConfigFlags,
+      ConfigFlags_FLAG_BORDERLESS_WINDOWED_MODE, ConfigFlags_FLAG_FULLSCREEN_MODE,
+      ConfigFlags_FLAG_INTERLACED_HINT, ConfigFlags_FLAG_MSAA_4X_HINT, ConfigFlags_FLAG_VSYNC_HINT,
+      ConfigFlags_FLAG_WINDOW_ALWAYS_RUN, ConfigFlags_FLAG_WINDOW_HIDDEN,
+      ConfigFlags_FLAG_WINDOW_HIGHDPI, ConfigFlags_FLAG_WINDOW_MAXIMIZED,
+      ConfigFlags_FLAG_WINDOW_MINIMIZED, ConfigFlags_FLAG_WINDOW_MOUSE_PASSTHROUGH,
+      ConfigFlags_FLAG_WINDOW_RESIZABLE, ConfigFlags_FLAG_WINDOW_TOPMOST,
+      ConfigFlags_FLAG_WINDOW_TRANSPARENT, ConfigFlags_FLAG_WINDOW_UNDECORATED,
+      ConfigFlags_FLAG_WINDOW_UNFOCUSED, DisableCursor, EnableCursor, GetCurrentMonitor,
+      InitWindow, SetConfigFlags, SetTargetFPS, SetWindowPosition, SetWindowSize, Vector3,
       WindowShouldClose, rlGetCullDistanceFar, rlGetCullDistanceNear,
     },
     wrapper::{
-      cameras::{Camera3D, Camera3DMode, Camera3DProjection},
+      cameras::{Camera3D, Camera3DMode, Camera3DProjection, ORTHO_CULL_FACTOR},
       monitor::Monitor,
       pens::Pen,
     },
   },
-  std::ffi::{CString, NulError, c_int},
+  std::{
+    collections::HashSet,
+    ffi::{CString, NulError, c_int},
+  },
   thiserror::Error,
 };
 
@@ -23,6 +34,55 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
+#[derive(Eq, Hash, PartialEq)]
+pub enum ConfigFlag {
+  VsyncHint,
+  FullscreenMode,
+  WindowResizable,
+  WindowUndecorated,
+  WindowHidden,
+  WindowMinimized,
+  WindowMaximized,
+  WindowUnfocused,
+  WindowTopmost,
+  WindowAlwaysRun,
+  WindowTransparent,
+  WindowHighdpi,
+  WindowMousePassthrough,
+  BorderlessWindowedMode,
+  Msaa4xHint,
+  InterlacedHint,
+}
+
+impl From<ConfigFlag> for RaylibConfigFlags {
+  fn from(value: ConfigFlag) -> Self {
+    use ConfigFlag::*;
+    match value {
+      VsyncHint => ConfigFlags_FLAG_VSYNC_HINT,
+      FullscreenMode => ConfigFlags_FLAG_FULLSCREEN_MODE,
+      WindowResizable => ConfigFlags_FLAG_WINDOW_RESIZABLE,
+      WindowUndecorated => ConfigFlags_FLAG_WINDOW_UNDECORATED,
+      WindowHidden => ConfigFlags_FLAG_WINDOW_HIDDEN,
+      WindowMinimized => ConfigFlags_FLAG_WINDOW_MINIMIZED,
+      WindowMaximized => ConfigFlags_FLAG_WINDOW_MAXIMIZED,
+      WindowUnfocused => ConfigFlags_FLAG_WINDOW_UNFOCUSED,
+      WindowTopmost => ConfigFlags_FLAG_WINDOW_TOPMOST,
+      WindowAlwaysRun => ConfigFlags_FLAG_WINDOW_ALWAYS_RUN,
+      WindowTransparent => ConfigFlags_FLAG_WINDOW_TRANSPARENT,
+      WindowHighdpi => ConfigFlags_FLAG_WINDOW_HIGHDPI,
+      WindowMousePassthrough => ConfigFlags_FLAG_WINDOW_MOUSE_PASSTHROUGH,
+      BorderlessWindowedMode => ConfigFlags_FLAG_BORDERLESS_WINDOWED_MODE,
+      Msaa4xHint => ConfigFlags_FLAG_MSAA_4X_HINT,
+      InterlacedHint => ConfigFlags_FLAG_INTERLACED_HINT,
+    }
+  }
+}
+
+pub struct Builder {
+  title: CString,
+  flags: HashSet<ConfigFlag>,
+}
+
 #[derive(Debug)]
 pub struct Window {
   pub(crate) width: u32,
@@ -30,18 +90,37 @@ pub struct Window {
   title: CString,
 }
 
-impl Window {
-  pub fn try_init(width: u32, height: u32, title: impl Into<Vec<u8>>) -> Result<Self> {
-    let title = CString::new(title)?;
-
-    unsafe { InitWindow(width as c_int, height as c_int, title.as_ptr()) }
-    Ok(Window {
-      width,
-      height,
-      title,
+impl Builder {
+  pub fn try_new(title: impl Into<Vec<u8>>) -> Result<Self> {
+    Ok(Self {
+      title: CString::new(title)?,
+      flags: Default::default(),
     })
   }
 
+  pub fn add_config_flag(&mut self, flag: ConfigFlag) -> &mut Self {
+    self.flags.insert(flag);
+    self
+  }
+
+  pub fn build(self, width: u32, height: u32) -> Window {
+    let mut flags: RaylibConfigFlags = 0;
+    for flag in self.flags {
+      flags |= RaylibConfigFlags::from(flag);
+    }
+    unsafe { SetConfigFlags(flags) }
+    let instance = Window {
+      title: self.title,
+      width,
+      height,
+    };
+
+    unsafe { InitWindow(width as c_int, height as c_int, instance.title.as_ptr()) }
+    instance
+  }
+}
+
+impl Window {
   pub fn set_size(&mut self, width: u32, height: u32) {
     unsafe { SetWindowSize(width as c_int, height as c_int) }
     self.width = width;
@@ -99,11 +178,11 @@ impl Window {
       projection: projection.clone(),
       near: match projection {
         Perspective => unsafe { rlGetCullDistanceNear() },
-        Orthographic => -(self.height as f32 * (fovy / 10.)) as f64 / 4.,
+        Orthographic => -(fovy as f64 * ORTHO_CULL_FACTOR),
       },
       far: match projection {
         Perspective => unsafe { rlGetCullDistanceFar() },
-        Orthographic => (self.height as f32 * (fovy / 10.)) as f64 / 4.,
+        Orthographic => fovy as f64 * ORTHO_CULL_FACTOR,
       },
       raylib_camera_3d: RaylibCamera3D {
         position,

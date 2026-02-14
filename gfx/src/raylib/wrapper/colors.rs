@@ -1,6 +1,9 @@
+use common::utils::Random;
+use rand::{Rng, RngExt};
+
 use crate::raylib::bindings::Color as RaylibColor;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Color {
   LightGray,
   Gray,
@@ -193,5 +196,11 @@ impl From<Color> for RaylibColor {
       },
       Custom(r, g, b, a) => RaylibColor { r, g, b, a },
     }
+  }
+}
+
+impl Random for Color {
+  fn random(rng: &mut impl Rng) -> Self {
+    Self::Custom(rng.random(), rng.random(), rng.random(), 255)
   }
 }

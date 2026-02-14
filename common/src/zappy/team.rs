@@ -2,7 +2,7 @@ use crate::zappy::{Error, Player, Result, constants::TEAM_SIZE};
 
 pub struct Team {
   name: String,
-  players: [Option<Player>; TEAM_SIZE],
+  pub(crate) players: [Option<Player>; TEAM_SIZE],
 }
 
 impl Team {

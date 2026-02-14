@@ -2,15 +2,14 @@ use {
   crate::raylib::{
     bindings::{
       ClearBackground, DEG2RAD, DrawCube, DrawCubeWires, DrawGrid, DrawModel, DrawText, EndDrawing,
-      EndMode3D, Model as RaylibModel, RL_MODELVIEW, RL_PROJECTION, Vector3,
-      rlDrawRenderBatchActive, rlEnableDepthTest, rlFrustum, rlGetCullDistanceNear, rlLoadIdentity,
-      rlMatrixMode, rlMultMatrixf, rlOrtho, rlPushMatrix,
+      EndMode3D, RL_MODELVIEW, RL_PROJECTION, Vector3, rlDrawRenderBatchActive, rlEnableDepthTest,
+      rlFrustum, rlGetCullDistanceNear, rlLoadIdentity, rlMatrixMode, rlMultMatrixf, rlOrtho,
+      rlPushMatrix,
     },
+    cameras::{Camera3D, Camera3DProjection},
+    colors::Color,
     custom_bindings::{MatrixLookAt, MatrixToFloatV},
-    wrapper::{
-      cameras::{Camera3D, Camera3DProjection},
-      colors::Color,
-    },
+    models::Model,
   },
   std::ffi::{CString, NulError, c_int},
   thiserror::Error,
@@ -121,9 +120,9 @@ impl Pen3D {
     unsafe { DrawCube(position, width, height, length, color.into()) }
   }
 
-  pub fn draw_mesh(&self, model: RaylibModel, position: Vector3, scale: f32, tint: Color) {
+  pub fn draw_model(&self, model: &Model, position: Vector3, scale: f32, tint: Color) {
     unsafe {
-      DrawModel(model, position, scale, tint.into());
+      DrawModel(model.raylib_model, position, scale, tint.into());
     }
   }
 

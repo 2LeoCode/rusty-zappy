@@ -6,7 +6,7 @@ use {
   rand::{Rng, RngExt},
 };
 
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub enum Ore {
   Linemate,
   Deraumere,

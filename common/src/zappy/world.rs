@@ -1,18 +1,21 @@
 use {
   crate::zappy::{Error, Player, Result, Team, Tile},
   rand::{Rng, RngExt},
-  std::collections::{HashMap, LinkedList},
+  std::{
+    cell::RefCell,
+    collections::{HashMap, LinkedList},
+  },
 };
 
-pub struct World<'a> {
+pub struct World {
   x: usize,
   y: usize,
   tiles: Vec<Tile>,
   teams: HashMap<String, Team>,
-  player_positions: HashMap<(usize, usize), LinkedList<&'a mut Player>>,
+  player_positions: HashMap<(usize, usize), LinkedList<(String, usize)>>,
 }
 
-impl<'a> World<'a> {
+impl World {
   pub fn empty(x: usize, y: usize) -> Self {
     Self {
       x,
@@ -48,93 +51,103 @@ impl<'a> World<'a> {
     self.y
   }
 
-  pub fn tile_at_pos(&'a self, x: usize, y: usize) -> &'a Tile {
+  pub fn iter_tiles(&self) -> impl Iterator<Item = ((usize, usize), &Tile)> {
+    self
+      .tiles
+      .iter()
+      .enumerate()
+      .map(|(i, t)| ((i / self.x(), i % self.x()), t))
+  }
+
+  pub fn tile_at_pos(&self, x: usize, y: usize) -> &Tile {
     &self.tiles[y * self.x + x]
   }
 
-  pub fn tile_at_pos_mut(&'a mut self, x: usize, y: usize) -> &'a mut Tile {
+  pub fn tile_at_pos_mut(&mut self, x: usize, y: usize) -> &mut Tile {
     &mut self.tiles[y * self.x + x]
   }
 
-  pub fn tile_at_index(&'a self, i: usize) -> &'a Tile {
+  pub fn tile_at_index(&self, i: usize) -> &Tile {
     &self.tiles[i]
   }
 
-  pub fn tile_at_index_mut(&'a mut self, i: usize) -> &'a mut Tile {
+  pub fn tile_at_index_mut(&mut self, i: usize) -> &mut Tile {
     &mut self.tiles[i]
   }
 
-  pub fn teams(&'a self) -> &'a HashMap<String, Team> {
+  pub fn teams(&self) -> &HashMap<String, Team> {
     &self.teams
   }
 
-  pub fn teams_mut(&'a mut self) -> &'a mut HashMap<String, Team> {
+  pub fn teams_mut(&mut self) -> &mut HashMap<String, Team> {
     &mut self.teams
   }
 
-  pub fn players_at_pos<'b>(
-    &'a self,
+  pub fn players_at_pos(
+    &self,
     x: usize,
     y: usize,
-  ) -> Option<impl Iterator<Item = &'a Player>>
-  where
-    'a: 'b,
-  {
-    self
-      .player_positions
-      .get(&(x, y))
-      .map(|v| v.iter().map(|v| &**v))
+  ) -> Option<impl Iterator<Item = &(String, usize)>> {
+    self.player_positions.get(&(x, y)).map(|v| v.iter())
   }
 
-  pub fn player_at_pos_mut(
-    &'a mut self,
-    x: usize,
-    y: usize,
-  ) -> Option<impl Iterator<Item = &'a mut Player>> {
-    self
-      .player_positions
-      .get_mut(&(x, y))
-      .map(|v| v.iter_mut().map(|v| &mut **v))
-  }
-
-  pub fn add_team(&'a mut self, name: impl Into<String> + AsRef<str>) -> Result<()> {
+  pub fn add_team(&mut self, name: impl Into<String> + AsRef<str>) -> Result<&mut Self> {
     let name = name.into();
-    self
-      .teams
-      .get_mut(name.as_str())
-      .map(|_| Err::<(), _>(Error::TeamExists(name.clone())))
-      .transpose()
-      .map(|_| {
-        self.teams.insert(name.clone(), Team::empty(name));
-      })
+    if self.teams.get_mut(name.as_str()).is_some() {
+      Err(Error::TeamExists(name.clone()))
+    } else {
+      self.teams.insert(name.clone(), Team::empty(name));
+      Ok(self)
+    }
   }
 
-  pub fn remove_team(&'a mut self, name: impl Into<String> + AsRef<str>) -> Result<()> {
+  pub fn remove_team(&mut self, name: impl Into<String> + AsRef<str>) -> Result<&mut Self> {
     self
       .teams
       .remove(name.as_ref())
-      .map(|_| ())
-      .ok_or(Error::TeamDoesntExist(name.into()))
+      .ok_or(Error::TeamDoesntExist(name.into()))?;
+    Ok(self)
   }
 
-  pub fn add_player(&'a mut self, team_name: impl Into<String> + AsRef<str>) -> Result<usize> {
+  pub fn add_player(&mut self, team_name: impl Into<String> + AsRef<str>) -> Result<usize> {
     use Error::*;
+    let team_name = team_name.into();
     self
       .teams
-      .get_mut(team_name.as_ref())
-      .map_or(Err(TeamDoesntExist(team_name.into())), |t| {
-        // TODO: add player to player_positions
-        Ok(t.add_player()?)
+      .get_mut(team_name.as_str())
+      .map_or(Err(TeamDoesntExist(team_name.clone())), |t| {
+        let players = self.player_positions.entry((0, 0)).or_default();
+        let id = t.add_player()?;
+        players.push_back((team_name, id));
+        Ok(id)
       })
   }
 
-  pub fn remove_player(&'a mut self, team_name: String, id: usize) -> Result<()> {
+  pub fn remove_player(&mut self, team_name: String, id: usize) -> Result<&mut Self> {
     use Error::*;
     self
       .teams
       .get_mut(&team_name)
       .map_or(Err(TeamDoesntExist(team_name.clone())), |t| {
-        Ok(t.remove_player(id)?)
-      })
+        t.remove_player(id)
+      })?;
+    Ok(self)
+  }
+
+  pub fn iter_players(
+    &self,
+  ) -> impl Iterator<Item = ((usize, usize), impl Iterator<Item = &(String, usize)>)> {
+    self
+      .player_positions
+      .iter()
+      .map(|(pos, player_infos)| (*pos, player_infos.iter()))
+  }
+
+  pub fn get_player(&mut self, team_name: String, id: usize) -> Result<&Player> {
+    unimplemented!()
+  }
+
+  pub fn get_player_mut(&mut self, team_name: String, id: usize) -> Result<&Player> {
+    unimplemented!()
   }
 }

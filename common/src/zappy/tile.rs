@@ -15,4 +15,8 @@ impl Tile {
   pub fn fill_randomly(&mut self, rng: &mut impl Rng) {
     self.content = Some(Item::random(rng));
   }
+
+  pub fn content(&self) -> &Option<Item> {
+    &self.content
+  }
 }
