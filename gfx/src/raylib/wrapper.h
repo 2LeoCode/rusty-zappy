@@ -7,3 +7,4 @@
 
 Matrix MatrixLookAt(Vector3 eye, Vector3 target, Vector3 up);
 float16 MatrixToFloatV(Matrix mat);
+Matrix MatrixRotateY(float angle);

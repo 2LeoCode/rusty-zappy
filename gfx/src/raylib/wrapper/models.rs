@@ -1,6 +1,7 @@
 use crate::raylib::{
   bindings::{LoadModelFromMesh, Model as RaylibModel},
   meshes::Mesh,
+  raymath::Matrix,
 };
 
 pub struct Model {
@@ -12,5 +13,9 @@ impl Model {
     Self {
       raylib_model: unsafe { LoadModelFromMesh(mesh.raylib_mesh) },
     }
+  }
+
+  pub fn set_transform(&mut self, matrix: Matrix) {
+    self.raylib_model.transform = matrix.raylib_matrix;
   }
 }

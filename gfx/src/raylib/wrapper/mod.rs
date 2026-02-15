@@ -6,3 +6,5 @@ pub mod models;
 pub mod monitor;
 pub mod pens;
 pub mod window;
+
+pub mod raymath;

@@ -9,6 +9,7 @@ use {
     meshes::Mesh,
     models::Model,
     pens::Pen3D,
+    raymath::Matrix,
     window::{Builder as WindowBuilder, ConfigFlag, Window},
   },
   common::{
@@ -150,7 +151,7 @@ fn gfx() -> Result<(), impl Error> {
   let mut rng = rng();
   let mut world = World::generate(&mut rng, 127, 127);
 
-  let scene = Scene::new(&world, &mut rng);
+  let mut scene = Scene::new(&world, &mut rng);
 
   world
     .add_team("Team 1")?
@@ -185,6 +186,10 @@ fn gfx() -> Result<(), impl Error> {
 
   Ok::<(), common::zappy::Error>(while !window.should_close() {
     update_camera(&mut camera);
+    let angle = (unsafe { scene.begin.elapsed().unwrap_unchecked() }.as_secs_f32() * 4.) % 360.;
+    for (_, model, _) in &mut scene.nourritures {
+      model.set_transform(Matrix::rotate_y(angle));
+    }
     window.begin_drawing(|pen| {
       use Color::*;
       pen.clear_background(RayWhite);

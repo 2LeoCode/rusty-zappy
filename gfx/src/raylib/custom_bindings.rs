@@ -6,4 +6,7 @@ unsafe extern "C" {
 
   #[inline]
   pub fn MatrixToFloatV(matrix: Matrix) -> float16;
+
+  #[inline]
+  pub fn MatrixRotateY(angle: f32) -> Matrix;
 }
