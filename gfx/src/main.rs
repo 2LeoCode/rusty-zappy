@@ -16,7 +16,7 @@ use {
     zappy::{Item, Ore, World, constants::TEAM_SIZE},
   },
   rand::{Rng, rng},
-  std::{collections::HashMap, error::Error, process::ExitCode},
+  std::{collections::HashMap, error::Error, process::ExitCode, time::SystemTime},
 };
 
 const CAMERA_SPEED: f32 = 1.;
@@ -56,6 +56,7 @@ struct Engine {
 }
 
 struct Scene {
+  begin: SystemTime,
   plane: Model,
   nourritures: Vec<((f32, f32), Model, Color)>,
   ores: Vec<((f32, f32), Model, Color)>,
@@ -65,14 +66,15 @@ struct Scene {
 impl Scene {
   fn world_to_scene_pos(world: &World, (x, y): (usize, usize)) -> (f32, f32) {
     (
-      x as f32 - world.x() as f32 / 2. + 1.,
-      y as f32 - world.y() as f32 / 2. + 1.,
+      x as f32 - world.x() as f32 / 2. + 0.5,
+      y as f32 - world.y() as f32 / 2. + 0.5,
     )
   }
 
   fn new(world: &World, rng: &mut impl Rng) -> Self {
     let mut ore_colors = HashMap::<Ore, Color>::new();
     Self {
+      begin: SystemTime::now(),
       plane: Model::from_mesh(Mesh::gen_plane(world.x() as f32, world.y() as f32, 1, 1)),
       nourritures: world
         .iter_tiles()
@@ -80,7 +82,7 @@ impl Scene {
           t.content().as_ref().and_then(|item| match item {
             Item::Nourriture => Some((
               Self::world_to_scene_pos(world, pos),
-              Model::from_mesh(Mesh::gen_knot(1., 0.3, 16, 64)),
+              Model::from_mesh(Mesh::gen_torus(0.4, 0.4, 16, 128)),
               Color::Orange,
             )),
             Item::Ore(_) => None,
@@ -108,12 +110,11 @@ impl Scene {
   }
 
   fn render(&self, pen_3d: &Pen3D) {
-    pen_3d.draw_grid(128, 1.);
     pen_3d.draw_model(
       &self.plane,
       Vector3 {
         x: 0.,
-        y: -0.01,
+        y: 0.,
         z: 0.,
       },
       1.,
@@ -124,7 +125,8 @@ impl Scene {
         model,
         Vector3 {
           x: *x,
-          y: 0.7,
+          y: 0.5
+            + (unsafe { self.begin.elapsed().unwrap_unchecked() }.as_secs_f32() * 3.).sin() / 6.,
           z: *z,
         },
         1.,
@@ -161,14 +163,6 @@ fn gfx() -> Result<(), impl Error> {
     world.add_player("Team 3")?;
   }
 
-  // let window = window;
-
-  // let cube_position = Vector3 {
-  //   x: 0.,
-  //   y: 0.,
-  //   z: 0.,
-  // };
-
   let mut camera = window.new_camera_3d(
     Vector3 {
       x: 0.,
@@ -189,7 +183,6 @@ fn gfx() -> Result<(), impl Error> {
     Camera3DProjection::Orthographic,
   );
 
-  // window.set_target_fps(current_monitor.get_refresh_rate());
   Ok::<(), common::zappy::Error>(while !window.should_close() {
     update_camera(&mut camera);
     window.begin_drawing(|pen| {
@@ -197,20 +190,7 @@ fn gfx() -> Result<(), impl Error> {
       pen.clear_background(RayWhite);
       pen.begin_mode_3d(&camera, |pen_3d| {
         scene.render(&pen_3d);
-        // pen_3d.draw_grid(GRID_SIZE as i32, 1.);
-        // pen_3d.draw_cube(cube_position, 2., 2., 2., Red);
-        // pen_3d.draw_cube_wires(cube_position, 2., 2., 2., Blue);
       });
-
-      // pen
-      //   .draw_text(
-      //     "urmom",
-      //     current_monitor.width() / 64u32,
-      //     0,
-      //     current_monitor.height() / 8u32,
-      //     Color::Blue,
-      //   )
-      //   .expect("Invalid arguments to draw_text");
     });
   })
 }

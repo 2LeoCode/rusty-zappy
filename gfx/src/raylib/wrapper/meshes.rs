@@ -1,6 +1,6 @@
 use {
   crate::raylib::bindings::{
-    GenMeshCube, GenMeshCylinder, GenMeshKnot, GenMeshPlane, Mesh as RaylibMesh,
+    GenMeshCube, GenMeshCylinder, GenMeshKnot, GenMeshPlane, GenMeshTorus, Mesh as RaylibMesh,
   },
   std::ffi::c_int,
 };
@@ -13,6 +13,12 @@ impl Mesh {
   pub fn gen_cylinder(radius: f32, height: f32, slices: i32) -> Self {
     Self {
       raylib_mesh: unsafe { GenMeshCylinder(radius, height, slices as c_int) },
+    }
+  }
+
+  pub fn gen_torus(radius: f32, size: f32, radSeg: i32, sides: i32) -> Self {
+    Self {
+      raylib_mesh: unsafe { GenMeshTorus(radius, size, radSeg, sides) },
     }
   }
 
