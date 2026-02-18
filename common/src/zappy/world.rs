@@ -1,15 +1,12 @@
 use {
   crate::zappy::{Error, Player, Result, Team, Tile},
   rand::{Rng, RngExt},
-  std::{
-    cell::RefCell,
-    collections::{HashMap, LinkedList},
-  },
+  std::collections::{HashMap, LinkedList},
 };
 
 pub struct World {
-  x: usize,
-  y: usize,
+  size_x: usize,
+  size_y: usize,
   tiles: Vec<Tile>,
   teams: HashMap<String, Team>,
   player_positions: HashMap<(usize, usize), LinkedList<(String, usize)>>,
@@ -18,8 +15,8 @@ pub struct World {
 impl World {
   pub fn empty(x: usize, y: usize) -> Self {
     Self {
-      x,
-      y,
+      size_x: x,
+      size_y: y,
       tiles: vec![Tile::default(); x * y],
       teams: HashMap::new(),
       player_positions: HashMap::new(),
@@ -43,12 +40,12 @@ impl World {
     instance
   }
 
-  pub fn x(&self) -> usize {
-    self.x
+  pub fn size_x(&self) -> usize {
+    self.size_x
   }
 
-  pub fn y(&self) -> usize {
-    self.y
+  pub fn size_y(&self) -> usize {
+    self.size_y
   }
 
   pub fn iter_tiles(&self) -> impl Iterator<Item = ((usize, usize), &Tile)> {
@@ -56,15 +53,15 @@ impl World {
       .tiles
       .iter()
       .enumerate()
-      .map(|(i, t)| ((i / self.x(), i % self.x()), t))
+      .map(|(i, t)| ((i / self.size_x(), i % self.size_x()), t))
   }
 
   pub fn tile_at_pos(&self, x: usize, y: usize) -> &Tile {
-    &self.tiles[y * self.x + x]
+    &self.tiles[y * self.size_x + x]
   }
 
   pub fn tile_at_pos_mut(&mut self, x: usize, y: usize) -> &mut Tile {
-    &mut self.tiles[y * self.x + x]
+    &mut self.tiles[y * self.size_x + x]
   }
 
   pub fn tile_at_index(&self, i: usize) -> &Tile {
@@ -116,7 +113,10 @@ impl World {
       .teams
       .get_mut(team_name.as_str())
       .map_or(Err(TeamDoesntExist(team_name.clone())), |t| {
-        let players = self.player_positions.entry((0, 0)).or_default();
+        let players = self
+          .player_positions
+          .entry((0, 0))
+          .or_insert(LinkedList::new());
         let id = t.add_player()?;
         players.push_back((team_name, id));
         Ok(id)

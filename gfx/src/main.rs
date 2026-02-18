@@ -61,22 +61,28 @@ struct Scene {
   plane: Model,
   nourritures: Vec<((f32, f32), Model, Color)>,
   ores: Vec<((f32, f32), Model, Color)>,
-  players: Vec<((f32, f32), Model, Color)>,
+  players: Vec<((f32, f32, f32), Model, Color)>,
 }
 
 impl Scene {
   fn world_to_scene_pos(world: &World, (x, y): (usize, usize)) -> (f32, f32) {
     (
-      x as f32 - world.x() as f32 / 2. + 0.5,
-      y as f32 - world.y() as f32 / 2. + 0.5,
+      x as f32 - world.size_x() as f32 / 2. + 0.5,
+      y as f32 - world.size_y() as f32 / 2. + 0.5,
     )
   }
 
   fn new(world: &World, rng: &mut impl Rng) -> Self {
     let mut ore_colors = HashMap::<Ore, Color>::new();
+    let mut team_colors = HashMap::<String, Color>::new();
     Self {
       begin: SystemTime::now(),
-      plane: Model::from_mesh(Mesh::gen_plane(world.x() as f32, world.y() as f32, 1, 1)),
+      plane: Model::from_mesh(Mesh::gen_plane(
+        world.size_x() as f32,
+        world.size_y() as f32,
+        1,
+        1,
+      )),
       nourritures: world
         .iter_tiles()
         .filter_map(|(pos, t)| {
@@ -106,7 +112,30 @@ impl Scene {
           })
         })
         .collect(),
-      players: vec![],
+      players: world
+        .iter_players()
+        .flat_map(|(pos, players)| {
+          let (x, z) = Self::world_to_scene_pos(world, pos);
+          players.map(move |(team_name, _)| {
+            (
+              (x, z),
+              Model::from_mesh(Mesh::gen_cylinder(0.3, 0.05, 128)),
+              team_name,
+            )
+          })
+        })
+        .enumerate()
+        .map(|(i, ((x, z), model, team_name))| {
+          (
+            (x, 0.025 + i as f32 * 0.05, z),
+            model,
+            team_colors
+              .entry(team_name.clone())
+              .or_insert(Color::random(rng))
+              .clone(),
+          )
+        })
+        .collect(),
     }
   }
 
@@ -134,6 +163,18 @@ impl Scene {
         color.clone(),
       );
     }
+    for ((x, y, z), model, color) in self.players.iter() {
+      pen_3d.draw_model(
+        model,
+        Vector3 {
+          x: *x,
+          y: *y,
+          z: *z,
+        },
+        1.,
+        color.clone(),
+      );
+    }
   }
 }
 
@@ -149,9 +190,7 @@ fn gfx() -> Result<(), impl Error> {
   window.set_position(0, 0);
 
   let mut rng = rng();
-  let mut world = World::generate(&mut rng, 127, 127);
-
-  let mut scene = Scene::new(&world, &mut rng);
+  let mut world = World::generate(&mut rng, 16, 16);
 
   world
     .add_team("Team 1")?
@@ -163,6 +202,8 @@ fn gfx() -> Result<(), impl Error> {
     world.add_player("Team 2")?;
     world.add_player("Team 3")?;
   }
+
+  let mut scene = Scene::new(&world, &mut rng);
 
   let mut camera = window.new_camera_3d(
     Vector3 {
